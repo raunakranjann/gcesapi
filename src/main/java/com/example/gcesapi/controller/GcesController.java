@@ -4,6 +4,8 @@ import com.example.gcesapi.model.*;
 import com.example.gcesapi.service.GcesService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.gcesapi.model.SubDistrict;
+import com.example.gcesapi.model.SubDistrictSyncRequest;
 import java.util.List;
 
 @RestController
@@ -84,6 +86,16 @@ public class GcesController {
         try {
             List<District> districts = gcesService.syncDistrictData(request.getUserName());
             return ResponseEntity.ok(districts.size() + " districts synchronized for user: " + request.getUserName());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/sync-subDistrict")
+    public ResponseEntity<String> syncSubDistrict(@RequestBody SubDistrictSyncRequest request) {
+        try {
+            List<SubDistrict> subDistricts = gcesService.syncSubDistrictData(request.getUserName());
+            return ResponseEntity.ok(subDistricts.size() + " sub-districts synchronized for user: " + request.getUserName());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }

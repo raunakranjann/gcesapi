@@ -5,6 +5,7 @@ import com.example.gcesapi.repository.UserTokenRepository;
 import com.example.gcesapi.repository.VillageRepository;
 import com.example.gcesapi.repository.StateRepository;
 import com.example.gcesapi.repository.DistrictRepository;
+import com.example.gcesapi.repository.SubDistrictRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class GcesService {
     private final VillageRepository villageRepository;
     private final StateRepository stateRepository;
     private final DistrictRepository districtRepository;
+    private final SubDistrictRepository subDistrictRepository;
 
     @Value("${gces.api.auth.url}")
     private String authApiUrl;
@@ -31,14 +33,22 @@ public class GcesService {
     @Value("${gces.api.villages.url}")
     private String villagesApiUrl;
 
-    public GcesService(RestTemplate restTemplate, UserTokenRepository userTokenRepository, VillageRepository villageRepository, StateRepository stateRepository, DistrictRepository districtRepository) {
+    public GcesService(RestTemplate restTemplate, UserTokenRepository userTokenRepository, VillageRepository villageRepository, StateRepository stateRepository, DistrictRepository districtRepository, SubDistrictRepository subDistrictRepository) {
         this.restTemplate = restTemplate;
         this.userTokenRepository = userTokenRepository;
         this.villageRepository = villageRepository;
         this.stateRepository = stateRepository;
         this.districtRepository = districtRepository;
+        this.subDistrictRepository = subDistrictRepository;
     }
 
+    /**
+     * Authenticates with the external API and stores the returned token and user ID.
+     * This method is a single responsibility method for login.
+     * @param userName The user's username.
+     * @param userPassword The user's password.
+     * @return The UserToken entity that was saved to the database.
+     */
     public UserToken loginAndStoreToken(String userName, String userPassword) {
         AuthenticationRequest authRequest = new AuthenticationRequest();
         authRequest.setFarmerGrievance(false);
@@ -88,7 +98,14 @@ public class GcesService {
         }
     }
 
-    // New method to sync villages using a pre-existing token and optional LGD codes.
+    /**
+     * Synchronizes village data using a pre-existing token and optional LGD codes.
+     * @param userName The user's username (token must exist).
+     * @param stateCodes Optional list of state LGD codes for filtering.
+     * @param districtCodes Optional list of district LGD codes for filtering.
+     * @param subDistrictCodes Optional list of sub-district LGD codes for filtering.
+     * @return A list of saved Village entities.
+     */
     public List<Village> syncVillagesDataWithLgds(String userName, List<Integer> stateCodes, List<Integer> districtCodes, List<Integer> subDistrictCodes) {
         Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
         if (userTokenOptional.isEmpty()) {
@@ -96,13 +113,14 @@ public class GcesService {
         }
 
         String token = userTokenOptional.get().getToken();
+        Long userId = userTokenOptional.get().getUserId();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         VillageRequest villageRequest = new VillageRequest();
-        villageRequest.setUserId(userTokenOptional.get().getUserId());
+        villageRequest.setUserId(userId);
         villageRequest.setStateLGDCodeList(stateCodes != null && !stateCodes.isEmpty() ? stateCodes : Collections.singletonList(35));
         villageRequest.setDistrictLgdCodeList(districtCodes != null && !districtCodes.isEmpty() ? districtCodes : Collections.singletonList(603));
         villageRequest.setSubDistrictLgdCodeList(subDistrictCodes != null && !subDistrictCodes.isEmpty() ? subDistrictCodes : Collections.singletonList(5916));
@@ -134,6 +152,11 @@ public class GcesService {
         }
     }
 
+    /**
+     * Synchronizes state data using a pre-existing token.
+     * @param userName The user's username (token must exist).
+     * @return A list of saved State entities.
+     */
     public List<State> syncStateData(String userName) {
         Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
         if (userTokenOptional.isEmpty()) {
@@ -141,13 +164,14 @@ public class GcesService {
         }
 
         String token = userTokenOptional.get().getToken();
+        Long userId = userTokenOptional.get().getUserId();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         StateRequest stateRequest = new StateRequest();
-        stateRequest.setUserId(userTokenOptional.get().getUserId());
+        stateRequest.setUserId(userId);
         stateRequest.setBoundaryType("state");
 
         HttpEntity<StateRequest> requestEntity = new HttpEntity<>(stateRequest, headers);
@@ -176,6 +200,11 @@ public class GcesService {
         }
     }
 
+    /**
+     * Synchronizes district data using a pre-existing token.
+     * @param userName The user's username (token must exist).
+     * @return A list of saved District entities.
+     */
     public List<District> syncDistrictData(String userName) {
         Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
         if (userTokenOptional.isEmpty()) {
@@ -183,13 +212,14 @@ public class GcesService {
         }
 
         String token = userTokenOptional.get().getToken();
+        Long userId = userTokenOptional.get().getUserId();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         DistrictRequest districtRequest = new DistrictRequest();
-        districtRequest.setUserId(userTokenOptional.get().getUserId());
+        districtRequest.setUserId(userId);
         districtRequest.setBoundaryType("district");
 
         HttpEntity<DistrictRequest> requestEntity = new HttpEntity<>(districtRequest, headers);
@@ -219,6 +249,54 @@ public class GcesService {
         }
     }
 
+    /**
+     * Synchronizes sub-district data using a pre-existing token.
+     * @param userName The user's username (token must exist).
+     * @return A list of saved SubDistrict entities.
+     */
+    public List<SubDistrict> syncSubDistrictData(String userName) {
+        Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
+        if (userTokenOptional.isEmpty()) {
+            throw new RuntimeException("No token found for user: " + userName + ". Please authenticate first.");
+        }
+
+        String token = userTokenOptional.get().getToken();
+        Long userId = userTokenOptional.get().getUserId();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        SubDistrictRequest subDistrictRequest = new SubDistrictRequest();
+        subDistrictRequest.setUserId(userId);
+        subDistrictRequest.setBoundaryType("subDistrict");
+
+        HttpEntity<SubDistrictRequest> requestEntity = new HttpEntity<>(subDistrictRequest, headers);
+
+        try {
+            ResponseEntity<SubDistrictResponse> responseEntity = restTemplate.exchange(
+                    villagesApiUrl,
+                    HttpMethod.POST,
+                    requestEntity,
+                    SubDistrictResponse.class
+            );
+
+            if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.getBody() != null && "success".equals(responseEntity.getBody().getStatus())) {
+                List<SubDistrictData> subDistrictDataList = responseEntity.getBody().getData();
+                if (subDistrictDataList != null && !subDistrictDataList.isEmpty()) {
+                    List<SubDistrict> subDistricts = subDistrictDataList.stream().map(this::mapToSubDistrictEntity).collect(Collectors.toList());
+                    return subDistrictRepository.saveAll(subDistricts);
+                } else {
+                    return Collections.emptyList();
+                }
+            } else {
+                throw new RuntimeException("Failed to retrieve sub-district data: " + responseEntity.getStatusCode() + " - " + responseEntity.getBody().getMessage());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error during sub-district data API call: " + e.getMessage(), e);
+        }
+    }
+
     private Village mapToVillageEntity(VillageData villageData) {
         Village village = new Village();
         village.setVillageId(villageData.getVillageId());
@@ -243,7 +321,6 @@ public class GcesService {
         return village;
     }
 
-    // UPDATED METHOD: Correctly maps StateData to State entity.
     private State mapToStateEntity(StateData stateData) {
         State state = new State();
         state.setStateId(stateData.getStateId());
@@ -263,6 +340,24 @@ public class GcesService {
             district.setStateLgdCode(districtData.getStateLgdCode().getStateLgdCode());
         }
         return district;
+    }
+
+    private SubDistrict mapToSubDistrictEntity(SubDistrictData subDistrictData) {
+        SubDistrict subDistrict = new SubDistrict();
+        subDistrict.setSubDistrictId(subDistrictData.getSubDistrictId());
+        subDistrict.setSubDistrictName(subDistrictData.getSubDistrictName());
+        subDistrict.setSubDistrictLgdCode(subDistrictData.getSubDistrictLgdCode());
+        if (subDistrictData.getStateLgdCode() != null) {
+            subDistrict.setStateId(subDistrictData.getStateLgdCode().getStateId());
+            subDistrict.setStateName(subDistrictData.getStateLgdCode().getStateName());
+            subDistrict.setStateLgdCode(subDistrictData.getStateLgdCode().getStateLgdCode());
+        }
+        if (subDistrictData.getDistrictLgdCode() != null) {
+            subDistrict.setDistrictId(subDistrictData.getDistrictLgdCode().getDistrictId());
+            subDistrict.setDistrictName(subDistrictData.getDistrictLgdCode().getDistrictName());
+            subDistrict.setDistrictLgdCode(subDistrictData.getDistrictLgdCode().getDistrictLgdCode());
+        }
+        return subDistrict;
     }
 
     public Optional<UserToken> getUserTokenByUserName(String userName) {
