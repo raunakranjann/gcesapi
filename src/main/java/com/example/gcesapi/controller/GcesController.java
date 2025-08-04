@@ -4,8 +4,6 @@ import com.example.gcesapi.model.*;
 import com.example.gcesapi.service.GcesService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.gcesapi.model.SubDistrict;
-import com.example.gcesapi.model.SubDistrictSyncRequest;
 import java.util.List;
 
 @RestController
@@ -28,15 +26,13 @@ public class GcesController {
         }
     }
 
-    @PostMapping("/authenticate-and-sync-villages")
+    @PostMapping("/login-and-sync-villages")
     public ResponseEntity<String> authenticateAndSyncVillages(@RequestBody AuthenticationRequestWithLgds request) {
         try {
             gcesService.loginAndStoreToken(request.getUserName(), request.getUserPassword());
-            List<Village> villages = gcesService.syncVillagesDataWithLgds(
+            List<Village> villages = gcesService.syncVillagesByStateLgds(
                     request.getUserName(),
-                    request.getStateLGDCodeList(),
-                    request.getDistrictLgdCodeList(),
-                    request.getSubDistrictLgdCodeList()
+                    request.getStateLGDCodeList()
             );
             return ResponseEntity.ok("Authentication successful and " + villages.size() + " villages synchronized for user: " + request.getUserName());
         } catch (RuntimeException e) {
@@ -44,28 +40,24 @@ public class GcesController {
         }
     }
 
-    // This endpoint remains unchanged and uses a hardcoded list of LGD codes.
-    @PostMapping("/sync-villages")
-    public ResponseEntity<String> syncVillages(@RequestParam String userName) {
+    @PostMapping("/sync-villages-lgd")
+    public ResponseEntity<String> syncVillagesByState(@RequestBody VillageSyncRequest request) {
         try {
-            List<Village> villages = gcesService.syncVillagesDataWithLgds(userName, null, null, null);
-            return ResponseEntity.ok(villages.size() + " villages synchronized for user: " + userName);
+            List<Village> villages = gcesService.syncVillagesByStateLgds(
+                    request.getUserName(),
+                    request.getStateLGDCodeList()
+            );
+            return ResponseEntity.ok(villages.size() + " villages synchronized for user: " + request.getUserName());
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
 
-    // NEW ENDPOINT: Sync villages with optional LGD codes using a pre-existing token
     @PostMapping("/sync-village")
-    public ResponseEntity<String> syncVillagesWithLgds(@RequestBody AuthenticationRequestWithLgds request) {
+    public ResponseEntity<String> syncVillages(@RequestParam String userName) {
         try {
-            List<Village> villages = gcesService.syncVillagesDataWithLgds(
-                    request.getUserName(),
-                    request.getStateLGDCodeList(),
-                    request.getDistrictLgdCodeList(),
-                    request.getSubDistrictLgdCodeList()
-            );
-            return ResponseEntity.ok(villages.size() + " villages synchronized for user: " + request.getUserName());
+            List<Village> villages = gcesService.syncVillagesDataWithLgds(userName, null, null, null);
+            return ResponseEntity.ok(villages.size() + " villages synchronized for user: " + userName);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
@@ -91,7 +83,7 @@ public class GcesController {
         }
     }
 
-    @PostMapping("/sync-subDistrict")
+    @PostMapping("/sync-subdistrict")
     public ResponseEntity<String> syncSubDistrict(@RequestBody SubDistrictSyncRequest request) {
         try {
             List<SubDistrict> subDistricts = gcesService.syncSubDistrictData(request.getUserName());

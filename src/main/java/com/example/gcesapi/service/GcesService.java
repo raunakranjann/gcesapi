@@ -16,6 +16,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 public class GcesService {
@@ -42,13 +44,6 @@ public class GcesService {
         this.subDistrictRepository = subDistrictRepository;
     }
 
-    /**
-     * Authenticates with the external API and stores the returned token and user ID.
-     * This method is a single responsibility method for login.
-     * @param userName The user's username.
-     * @param userPassword The user's password.
-     * @return The UserToken entity that was saved to the database.
-     */
     public UserToken loginAndStoreToken(String userName, String userPassword) {
         AuthenticationRequest authRequest = new AuthenticationRequest();
         authRequest.setFarmerGrievance(false);
@@ -98,14 +93,6 @@ public class GcesService {
         }
     }
 
-    /**
-     * Synchronizes village data using a pre-existing token and optional LGD codes.
-     * @param userName The user's username (token must exist).
-     * @param stateCodes Optional list of state LGD codes for filtering.
-     * @param districtCodes Optional list of district LGD codes for filtering.
-     * @param subDistrictCodes Optional list of sub-district LGD codes for filtering.
-     * @return A list of saved Village entities.
-     */
     public List<Village> syncVillagesDataWithLgds(String userName, List<Integer> stateCodes, List<Integer> districtCodes, List<Integer> subDistrictCodes) {
         Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
         if (userTokenOptional.isEmpty()) {
@@ -121,9 +108,10 @@ public class GcesService {
 
         VillageRequest villageRequest = new VillageRequest();
         villageRequest.setUserId(userId);
-        villageRequest.setStateLGDCodeList(stateCodes != null && !stateCodes.isEmpty() ? stateCodes : Collections.singletonList(35));
-        villageRequest.setDistrictLgdCodeList(districtCodes != null && !districtCodes.isEmpty() ? districtCodes : Collections.singletonList(603));
-        villageRequest.setSubDistrictLgdCodeList(subDistrictCodes != null && !subDistrictCodes.isEmpty() ? subDistrictCodes : Collections.singletonList(5916));
+
+        villageRequest.setStateLGDCodeList(stateCodes);
+        villageRequest.setDistrictLgdCodeList(districtCodes);
+        villageRequest.setSubDistrictLgdCodeList(subDistrictCodes);
         villageRequest.setBoundaryType("village");
 
         HttpEntity<VillageRequest> requestEntity = new HttpEntity<>(villageRequest, headers);
@@ -152,11 +140,29 @@ public class GcesService {
         }
     }
 
-    /**
-     * Synchronizes state data using a pre-existing token.
-     * @param userName The user's username (token must exist).
-     * @return A list of saved State entities.
-     */
+    public List<Village> syncVillagesByStateLgds(String userName, List<Integer> stateLgdCodes) {
+        Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
+        if (userTokenOptional.isEmpty()) {
+            throw new RuntimeException("No token found for user: " + userName + ". Please authenticate first.");
+        }
+
+        List<Long> longStateLgdCodes = stateLgdCodes.stream().mapToLong(Integer::longValue).boxed().collect(Collectors.toList());
+        List<SubDistrict> subDistricts = subDistrictRepository.findByStateLgdCodeIn(longStateLgdCodes);
+
+        Set<Long> districtLgdCodes = new HashSet<>();
+        Set<Long> subDistrictLgdCodes = new HashSet<>();
+
+        for (SubDistrict sd : subDistricts) {
+            districtLgdCodes.add(sd.getDistrictLgdCode());
+            subDistrictLgdCodes.add(sd.getSubDistrictLgdCode());
+        }
+
+        List<Integer> finalDistrictLgdCodes = districtLgdCodes.stream().map(Long::intValue).collect(Collectors.toList());
+        List<Integer> finalSubDistrictLgdCodes = subDistrictLgdCodes.stream().map(Long::intValue).collect(Collectors.toList());
+
+        return syncVillagesDataWithLgds(userName, stateLgdCodes, finalDistrictLgdCodes, finalSubDistrictLgdCodes);
+    }
+
     public List<State> syncStateData(String userName) {
         Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
         if (userTokenOptional.isEmpty()) {
@@ -200,11 +206,6 @@ public class GcesService {
         }
     }
 
-    /**
-     * Synchronizes district data using a pre-existing token.
-     * @param userName The user's username (token must exist).
-     * @return A list of saved District entities.
-     */
     public List<District> syncDistrictData(String userName) {
         Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
         if (userTokenOptional.isEmpty()) {
@@ -249,11 +250,6 @@ public class GcesService {
         }
     }
 
-    /**
-     * Synchronizes sub-district data using a pre-existing token.
-     * @param userName The user's username (token must exist).
-     * @return A list of saved SubDistrict entities.
-     */
     public List<SubDistrict> syncSubDistrictData(String userName) {
         Optional<UserToken> userTokenOptional = userTokenRepository.findByUserName(userName);
         if (userTokenOptional.isEmpty()) {
