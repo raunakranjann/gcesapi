@@ -5,16 +5,17 @@ This documentation provides details on the API endpoints for the GCES integratio
 Base URL
 http://localhost:8080/gces
 1. User Authentication
+
 This endpoint is used to authenticate a user and generate an access token, which is stored in the database for subsequent API calls.
 POST /login
 •	Description: Authenticates a user with a username and password, then stores the resulting access token in the user_tokens table.
 •	Method: POST
 •	Request Body: application/json
-•	{
-•	  "isFarmerGrievance": false,
-•	  "userName": "7250122882",
-•	  "userPassword": "000491"
-•	}
+	{
+	  "isFarmerGrievance": false,
+  "userName": "7250122882",
+  "userPassword": "000491"
+	}
 •	Success Response (200 OK):
 •	Login successful. Token stored for user: 7250122882
 •	Error Response (400 Bad Request):
