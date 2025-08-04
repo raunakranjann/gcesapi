@@ -42,91 +42,6 @@ This endpoint is used to authenticate a user and generate an access token, which
 
 -----
 
-## Village Data Synchronization
-
-These endpoints are used to synchronize village data from the external API.
-
-### `POST /authenticate-and-sync-villages`
-
-  * **Description**: Performs a full login and then synchronizes village data. This endpoint is useful for a first-time login where a token might not exist. It accepts optional LGD codes to filter the villages.
-  * **Method**: `POST`
-  * **Request Body**: `application/json`
-      * **With optional LGD codes**:
-        ```json
-        {
-          "isFarmerGrievance": false,
-          "userName": "7250122882",
-          "userPassword": "000491",
-          "stateLGDCodeList": [70],
-          "districtLgdCodeList": [400],
-          "subDistrictLgdCodeList": [4000]
-        }
-        ```
-      * **Without optional LGD codes (uses defaults from the service)**:
-        ```json
-        {
-          "isFarmerGrievance": false,
-          "userName": "7250122882",
-          "userPassword": "000491"
-        }
-        ```
-  * **Success Response (200 OK)**:
-    ```
-    Authentication successful and 105 villages synchronized for user: 7250122882
-    ```
-  * **Postman Test Case**:
-    1.  Set the Method to `POST`.
-    2.  Set the URL to `http://localhost:8080/gces/authenticate-and-sync-villages`.
-    3.  Go to the `Body` tab, select `raw`, and choose `JSON`.
-    4.  Paste one of the request bodies above and click `Send`.
-
-### `POST /sync-village`
-
-  * **Description**: Synchronizes village data using an existing token for the specified user. This endpoint assumes the user has already logged in. It accepts optional LGD codes.
-  * **Method**: `POST`
-  * **Request Body**: `application/json`
-      * **Without LGD codes (uses defaults from the service)**:
-        ```json
-        {
-          "userName": "7250122882"
-        }
-        ```
-  * **Success Response (200 OK)**:
-    ```
-    105 villages synchronized for user: 7250122882
-    ```
-  * **Error Response (400 Bad Request)**:
-    ```
-    Error: No token found for user: 7250122882. Please authenticate first.
-    ```
-  * **Postman Test Case**:
-    1.  First, ensure you have successfully called `POST /login`.
-    2.  Set the Method to `POST`.
-    3.  Set the URL to `http://localhost:8080/gces/sync-villages-with-lgds`.
-    4.  Go to the `Body` tab, select `raw`, and choose `JSON`.
-    5.  Paste the request body JSON provided above and click `Send`.
-
-### `POST /sync-villages`
-
-  * **Description**: Synchronizes all villages using an existing token. This endpoint uses hardcoded default LGD codes in the service.
-  * **Method**: `POST`
-  * **URL**: `http://localhost:8080/gces/sync-villages?userName=7250122882`
-  * **Success Response (200 OK)**:
-    ```
-    105 villages synchronized for user: 7250122882
-    ```
-  * **Error Response (400 Bad Request)**:
-    ```
-    Error: No token found for user: 7250122882. Please authenticate first.
-    ```
-  * **Postman Test Case**:
-    1.  First, ensure you have successfully called `POST /login`.
-    2.  Set the Method to `POST`.
-    3.  Set the URL to `http://localhost:8080/gces/sync-villages?userName=7250122882`.
-    4.  Go to the `Body` tab and select `none`.
-    5.  Click `Send`.
-
------
 
 ## State Data Synchronization
 
@@ -185,6 +100,66 @@ These endpoints are used to synchronize village data from the external API.
     5.  Paste the request body JSON provided above and click `Send`.
 
 -----
+
+
+## Village Data Synchronization
+
+These endpoints are used to synchronize village data from the external API.
+
+### `POST /login-and-sync-villages`
+
+  * **Description**: Performs a full login and then synchronizes village data. This endpoint is useful for a first-time login where a token might not exist. It accepts state LGD codes to filter the villages.
+  * **Method**: `POST`
+  * **Request Body**: `application/json`
+      * **With optional LGD codes**:
+        ```json
+        {
+          "isFarmerGrievance": false,
+          "userName": "7250122882",
+          "userPassword": "000491",
+          "stateLGDCodeList": [10]
+        }
+        ```
+ 
+  * **Success Response (200 OK)**:
+    ```
+    Authentication successful and 105 villages synchronized for user: 7250122882
+    ```
+  * **Postman Test Case**:
+    1.  Set the Method to `POST`.
+    2.  Set the URL to `http://localhost:8080/gces/login-and-sync-villages`.
+    3.  Go to the `Body` tab, select `raw`, and choose `JSON`.
+    4.  Paste one of the request bodies above and click `Send`.
+
+### `POST /sync-villages-lgd`
+
+  * **Description**: Synchronizes village data using an existing token for the specified user. This endpoint assumes the user has already logged in. It accepts state LGD codes.
+  * **Method**: `POST`
+  * **Request Body**: `application/json`
+      * **Without LGD codes (uses defaults from the service)**:
+        ```json
+        {
+          "userName": "7250122882",
+           "stateLGDCodeList": [7]
+        }
+        ```
+  * **Success Response (200 OK)**:
+    ```
+    105 villages synchronized for user: 7250122882
+    ```
+  * **Error Response (400 Bad Request)**:
+    ```
+    Error: No token found for user: 7250122882. Please authenticate first.
+    ```
+  * **Postman Test Case**:
+    1.  First, ensure you have successfully called `POST /login`.
+    2.  Set the Method to `POST`.
+    3.  Set the URL to `http://localhost:8080/gces/sync-villages-lgd`.
+    4.  Go to the `Body` tab, select `raw`, and choose `JSON`.
+    5.  Paste the request body JSON provided above and click `Send`.
+
+-----
+
 
 ## Token Retrieval (Verification)
 
