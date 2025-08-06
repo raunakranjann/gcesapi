@@ -101,6 +101,39 @@ This endpoint is used to authenticate a user and generate an access token, which
 
 -----
 
+## Sub-District Data Synchronization
+
+### `POST /sync-subdistrict`
+
+  * **Description**: Synchronizes district data using an existing token. Assumes a token exists for the given user.
+  * **Method**: `POST`
+  * **Request Body**: `application/json`
+    ```json
+    {
+      "userName": "XXXXXXXX82"
+    }
+    ```
+  * **Success Response (200 OK)**:
+    ```
+    X sub-districts synchronized for user: XXXXXXXX82
+    ```
+  * **Error Response (400 Bad Request)**:
+    ```
+    Error: No token found for user: XXXXXXXX82. Please authenticate first.
+    ```
+  * **Postman Test Case**:
+    1.  First, ensure you have successfully called `POST /login`.
+    2.  Set the Method to `POST`.
+    3.  Set the URL to `http://localhost:8080/gces/sync-subdistrict`.
+    4.  Go to the `Body` tab, select `raw`, and choose `JSON`.
+    5.  Paste the request body JSON provided above and click `Send`.
+
+-----
+
+
+
+
+
 
 ## Village Data Synchronization (Before syncing villages, it is essential to first sync the sub-districts.)
 
