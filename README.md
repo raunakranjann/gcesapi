@@ -102,34 +102,10 @@ This endpoint is used to authenticate a user and generate an access token, which
 -----
 
 
-## Village Data Synchronization
+## Village Data Synchronization (Before syncing villages, it is essential to first sync the sub-districts.)
 
 These endpoints are used to synchronize village data from the external API.
 
-### `POST /login-and-sync-villages`
-
-  * **Description**: Performs a full login and then synchronizes village data. This endpoint is useful for a first-time login where a token might not exist. It accepts state LGD codes to filter the villages.
-  * **Method**: `POST`
-  * **Request Body**: `application/json`
-      * **With optional LGD codes**:
-        ```json
-        {
-          "isFarmerGrievance": false,
-          "userName": "XXXXXXXX82",
-          "userPassword": "00XXXX",
-          "stateLGDCodeList": [10] //the state lgd-code for bihar is '10'
-        }
-        ```
- 
-  * **Success Response (200 OK)**:
-    ```
-    Authentication successful and 105 villages synchronized for user: XXXXXXXX82
-    ```
-  * **Postman Test Case**:
-    1.  Set the Method to `POST`.
-    2.  Set the URL to `http://localhost:8080/gces/login-and-sync-villages`.
-    3.  Go to the `Body` tab, select `raw`, and choose `JSON`.
-    4.  Paste one of the request bodies above and click `Send`.
 
 ### `POST /sync-villages-lgd`
 
@@ -159,6 +135,35 @@ These endpoints are used to synchronize village data from the external API.
     5.  Paste the request body JSON provided above and click `Send`.
 
 -----
+
+
+### `POST /login-and-sync-villages`
+
+  * **Description**: Performs a full login and then synchronizes village data. This endpoint is useful for a first-time login where a token might not exist. It accepts state LGD codes to filter the villages.
+  * **Method**: `POST`
+  * **Request Body**: `application/json`
+      * **With optional LGD codes**:
+        ```json
+        {
+          "isFarmerGrievance": false,
+          "userName": "XXXXXXXX82",
+          "userPassword": "00XXXX",
+          "stateLGDCodeList": [10] //the state lgd-code for bihar is '10'
+        }
+        ```
+ 
+  * **Success Response (200 OK)**:
+    ```
+    Authentication successful and 105 villages synchronized for user: XXXXXXXX82
+    ```
+  * **Postman Test Case**:
+    1.  Set the Method to `POST`.
+    2.  Set the URL to `http://localhost:8080/gces/login-and-sync-villages`.
+    3.  Go to the `Body` tab, select `raw`, and choose `JSON`.
+    4.  Paste one of the request bodies above and click `Send`.
+
+
+
 
 
 ## Token Retrieval (Verification)
