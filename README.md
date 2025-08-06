@@ -8,6 +8,12 @@ This documentation provides details on the API endpoints for the GCES integratio
 
 **Base URL**: `http://localhost:8080/gces`
 
+
+First of all, Config database in Application > resources > application.properties 
+set the db url , i.e., db_name , username, password etc 
+then build the application & enable annotations
+
+
 -----
 
 ## User Authentication
