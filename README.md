@@ -2,7 +2,7 @@
 
 -----
 
-# GCES API Documentation
+# GCES Third Party API Documentation
 
 This documentation provides details on the API endpoints for the GCES integration, including authentication and data synchronization for different administrative boundaries.
 
@@ -22,13 +22,13 @@ This endpoint is used to authenticate a user and generate an access token, which
     ```json
     {
       "isFarmerGrievance": false,
-      "userName": "7250122882",
-      "userPassword": "000491"
+      "userName": "XXXXXXXX82",
+      "userPassword": "00XXXX"
     }
     ```
   * **Success Response (200 OK)**:
     ```
-    Login successful. Token stored for user: 7250122882
+    Login successful. Token stored for user: XXXXXXXX82
     ```
   * **Error Response (400 Bad Request)**:
     ```
@@ -52,16 +52,16 @@ This endpoint is used to authenticate a user and generate an access token, which
   * **Request Body**: `application/json`
     ```json
     {
-      "userName": "7250122882"
+      "userName": "XXXXXXXX82"
     }
     ```
   * **Success Response (200 OK)**:
     ```
-    X states synchronized for user: 7250122882
+    X states synchronized for user: XXXXXXXX82
     ```
   * **Error Response (400 Bad Request)**:
     ```
-    Error: No token found for user: 7250122882. Please authenticate first.
+    Error: No token found for user: XXXXXXXX82. Please authenticate first.
     ```
   * **Postman Test Case**:
     1.  First, ensure you have successfully called `POST /login`.
@@ -81,16 +81,16 @@ This endpoint is used to authenticate a user and generate an access token, which
   * **Request Body**: `application/json`
     ```json
     {
-      "userName": "7250122882"
+      "userName": "XXXXXXXX82"
     }
     ```
   * **Success Response (200 OK)**:
     ```
-    X districts synchronized for user: 7250122882
+    X districts synchronized for user: XXXXXXXX82
     ```
   * **Error Response (400 Bad Request)**:
     ```
-    Error: No token found for user: 7250122882. Please authenticate first.
+    Error: No token found for user: XXXXXXXX82. Please authenticate first.
     ```
   * **Postman Test Case**:
     1.  First, ensure you have successfully called `POST /login`.
@@ -115,15 +115,15 @@ These endpoints are used to synchronize village data from the external API.
         ```json
         {
           "isFarmerGrievance": false,
-          "userName": "7250122882",
-          "userPassword": "000491",
-          "stateLGDCodeList": [10]
+          "userName": "XXXXXXXX82",
+          "userPassword": "00XXXX",
+          "stateLGDCodeList": [10] //the state lgd-code for bihar is '10'
         }
         ```
  
   * **Success Response (200 OK)**:
     ```
-    Authentication successful and 105 villages synchronized for user: 7250122882
+    Authentication successful and 105 villages synchronized for user: XXXXXXXX82
     ```
   * **Postman Test Case**:
     1.  Set the Method to `POST`.
@@ -139,17 +139,17 @@ These endpoints are used to synchronize village data from the external API.
       * **Without LGD codes (uses defaults from the service)**:
         ```json
         {
-          "userName": "7250122882",
-           "stateLGDCodeList": [7]
+          "userName": "XXXXXXXX82",
+           "stateLGDCodeList": [7] //the state lgd-code for delhi is '7'
         }
         ```
   * **Success Response (200 OK)**:
     ```
-    105 villages synchronized for user: 7250122882
+    105 villages synchronized for user: XXXXXXXX82
     ```
   * **Error Response (400 Bad Request)**:
     ```
-    Error: No token found for user: 7250122882. Please authenticate first.
+    Error: No token found for user: XXXXXXXX82. Please authenticate first.
     ```
   * **Postman Test Case**:
     1.  First, ensure you have successfully called `POST /login`.
@@ -167,14 +167,14 @@ These endpoints are used to synchronize village data from the external API.
 
   * **Description**: Retrieves the stored token details for a specific user.
   * **Method**: `GET`
-  * **URL**: `http://localhost:8080/gces/token/7250122882`
+  * **URL**: `http://localhost:8080/gces/token/XXXXXXXX82`
   * **Success Response (200 OK)**:
     ```json
     {
       "id": 1,
-      "userName": "7250122882",
+      "userName": "XXXXXXXX82",
       "token": "your_long_generated_token_string",
-      "userId": 109641,
+      "userId": XXXX41,
       "createdAt": "2025-08-03T18:00:00"
     }
     ```
@@ -184,7 +184,7 @@ These endpoints are used to synchronize village data from the external API.
     ```
   * **Postman Test Case**:
     1.  Set the Method to `GET`.
-    2.  Set the URL to `http://localhost:8080/gces/token/7250122882`.
+    2.  Set the URL to `http://localhost:8080/gces/token/XXXXXXXX82`.
     3.  Click `Send`.
 
 -----
