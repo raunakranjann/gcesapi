@@ -2,15 +2,15 @@
 
 -----
 
-# GCES Third Party API Documentation
+## GCES Third Party API Documentation
 
 This documentation provides details on the API endpoints for the GCES integration, including authentication and data synchronization for different administrative boundaries.
 
 **Base URL**: `http://localhost:8080/gces`
 
 
-First of all, Config database in Application > resources > application.properties 
-set the db url , i.e., db_name , username, password etc 
+First of all, Config database in Application > resources > application.properties </br>
+set the db url , i.e., db_name , username, password etc </br>
 then build the application & enable annotations
 
 
@@ -141,7 +141,7 @@ This endpoint is used to authenticate a user and generate an access token, which
 
 
 
-## Village Data Synchronization (Before syncing villages, it is essential to first sync the sub-districts.)
+## Village Data Synchronization </br> (Before syncing villages, it is essential to first sync the sub-districts.)
 
 These endpoints are used to synchronize village data from the external API.
 
