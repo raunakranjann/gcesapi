@@ -21,8 +21,8 @@
     <h2>Login to GCES API</h2>
     <!-- Form submits to the API endpoint -->
     <form th:action="@{/login}" method="post">
-        <input type="text" name="userName" placeholder="Username (e.g., 7250122882)" required/>
-        <input type="password" name="userPassword" placeholder="Password (e.g., 000491)" required/>
+        <input type="text" name="userName" placeholder="Enter your Username" required/>
+        <input type="password" name="userPassword" placeholder="Enter your Password" required/>
         <button type="submit">Login</button>
     </form>
     <div th:if="${error}" class="message-box error-message" th:text="${error}"></div>
