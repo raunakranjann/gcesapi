@@ -11,17 +11,29 @@
 </head>
 <body class="bg-gray-100" th:data-user-name="${userName}" th:data-user-full-name="${userFullName}">
 <div class="container text-center">
-    <h1 class="text-3xl font-bold mb-4 text-gray-900">Welcome, <span th:text="${userFullName}">User</span>!</h1>
+
+     <h1 class="text-3xl font-bold mb-4 text-gray-900 float-left">Welcome, <span th:text="${userFullName}">User</span>!</h1> 
+    
+     <div id="message-box" class="mt-8 p-4 rounded-lg text-sm hidden float-left"></div>
+     <button id="logout-btn" class="mt-8 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-red-700 transition duration-300 float-right">
+        Logout
+    </button>
+  
+
+     
+    <br><br><br><br>
+    <br>
+   
     <p class="text-gray-600 mb-8">Click a button below to synchronize data from the GCES API.</p>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-        <button id="sync-state-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
+        <button id="sync-state-btn" class="bg-blue-600 text-white font-semibold py-3 px-2 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
             Sync States
         </button>
-        <button id="sync-district-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
+        <button id="sync-district-btn" class="bg-blue-600 text-white font-semibold py-3 px-2 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
             Sync Districts
         </button>
-        <button id="sync-subdistrict-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
+        <button id="sync-subdistrict-btn" class="bg-blue-600 text-white font-semibold py-3 px-2 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
             Sync SubDistricts
         </button>
     </div>
@@ -37,11 +49,8 @@
         </button>
     </div>
 
-    <button id="logout-btn" class="mt-8 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-red-700 transition duration-300">
-        Logout
-    </button>
 
-    <div id="message-box" class="mt-8 p-4 rounded-lg text-sm hidden"></div>
+   
 
 </div>
 
