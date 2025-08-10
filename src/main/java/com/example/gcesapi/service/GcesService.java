@@ -68,6 +68,7 @@ public class GcesService {
                 if (data != null && data.getUserToken() != null && data.getUserId() != null) {
                     UserToken userToken = new UserToken();
                     userToken.setUserName(userName);
+                    userToken.setUserFullName(data.getUserFullName()); // ADDED: Set the new field
                     userToken.setToken(data.getUserToken());
                     userToken.setUserId(data.getUserId());
                     userToken.setCreatedAt(LocalDateTime.now());
@@ -77,6 +78,7 @@ public class GcesService {
                         UserToken tokenToUpdate = existingToken.get();
                         tokenToUpdate.setToken(data.getUserToken());
                         tokenToUpdate.setUserId(data.getUserId());
+                        tokenToUpdate.setUserFullName(data.getUserFullName()); // UPDATED: Set the new field
                         userTokenRepository.save(tokenToUpdate);
                         return tokenToUpdate;
                     } else {
@@ -99,6 +101,10 @@ public class GcesService {
             throw new RuntimeException("No token found for user: " + userName + ". Please authenticate first.");
         }
 
+        if (subDistrictRepository.count() == 0) {
+            throw new RuntimeException("SubDistrict data is not available. Please sync subDistrict data first.");
+        }
+
         String token = userTokenOptional.get().getToken();
         Long userId = userTokenOptional.get().getUserId();
 
@@ -108,7 +114,6 @@ public class GcesService {
 
         VillageRequest villageRequest = new VillageRequest();
         villageRequest.setUserId(userId);
-
         villageRequest.setStateLGDCodeList(stateCodes);
         villageRequest.setDistrictLgdCodeList(districtCodes);
         villageRequest.setSubDistrictLgdCodeList(subDistrictCodes);
@@ -146,13 +151,17 @@ public class GcesService {
             throw new RuntimeException("No token found for user: " + userName + ". Please authenticate first.");
         }
 
+        if (subDistrictRepository.count() == 0) {
+            throw new RuntimeException("SubDistrict data is not available. Please sync subDistrict data first.");
+        }
+
         List<Long> longStateLgdCodes = stateLgdCodes.stream().mapToLong(Integer::longValue).boxed().collect(Collectors.toList());
-        List<SubDistrict> subDistricts = subDistrictRepository.findByStateLgdCodeIn(longStateLgdCodes);
+        List<SubDistrict> subDistrictsInState = subDistrictRepository.findByStateLgdCodeIn(longStateLgdCodes);
 
         Set<Long> districtLgdCodes = new HashSet<>();
         Set<Long> subDistrictLgdCodes = new HashSet<>();
 
-        for (SubDistrict sd : subDistricts) {
+        for (SubDistrict sd : subDistrictsInState) {
             districtLgdCodes.add(sd.getDistrictLgdCode());
             subDistrictLgdCodes.add(sd.getSubDistrictLgdCode());
         }

@@ -7,4 +7,6 @@ import java.util.List;
 public class VillageSyncRequest {
     private String userName;
     private List<Integer> stateLGDCodeList;
+    private List<Integer> districtLgdCodeList;
+    private List<Integer> subDistrictLgdCodeList;
 }

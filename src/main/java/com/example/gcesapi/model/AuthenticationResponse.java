@@ -11,8 +11,9 @@ public class AuthenticationResponse {
 
     @Data
     public static class AuthenticationData {
-        private String userToken; // This field was changed from 'token' to 'userToken'
+        private String userToken;
         private Long userId;
-        // Add other fields if present in the actual response and needed
+
+        private String userFullName;
     }
 }

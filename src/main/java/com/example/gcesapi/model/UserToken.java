@@ -17,6 +17,9 @@ public class UserToken {
     @Column(unique = true, nullable = false)
     private String userName;
 
+    @Column(nullable = true)
+    private String userFullName;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String token;
 

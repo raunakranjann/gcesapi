@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .container { max-width: 800px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-100" th:data-user-name="${userName}" th:data-user-full-name="${userFullName}">
+<div class="container text-center">
+    <h1 class="text-3xl font-bold mb-4 text-gray-900">Welcome, <span th:text="${userFullName}">User</span>!</h1>
+    <p class="text-gray-600 mb-8">Click a button below to synchronize data from the GCES API.</p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <button id="sync-state-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
+            Sync States
+        </button>
+        <button id="sync-district-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
+            Sync Districts
+        </button>
+        <button id="sync-subdistrict-btn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300">
+            Sync SubDistricts
+        </button>
+    </div>
+
+    <div class="border-t border-gray-200 pt-6 mt-6">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800">Sync Villages by State LGD Code</h3>
+        <p class="text-sm text-gray-600 mb-4">
+            Enter a comma-separated list of State LGD Codes to fetch all corresponding villages.
+        </p>
+        <input type="text" id="state-lgd-input" placeholder="e.g., 70, 10" class="w-full md:w-1/2 p-2 border border-gray-300 rounded-lg mb-4 text-center">
+        <button id="sync-villages-by-state-btn" class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:bg-indigo-700 transition duration-300">
+            Sync Villages
+        </button>
+    </div>
+
+    <button id="logout-btn" class="mt-8 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-red-700 transition duration-300">
+        Logout
+    </button>
+
+    <div id="message-box" class="mt-8 p-4 rounded-lg text-sm hidden"></div>
+
+</div>
+
+<script>
+    const userName = document.body.dataset.userName;
+    const messageBox = document.getElementById('message-box');
+
+    function showMessage(message, isError = false) {
+        messageBox.textContent = message;
+        messageBox.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+        if (isError) {
+            messageBox.classList.add('bg-red-100', 'text-red-800');
+        } else {
+            messageBox.classList.add('bg-green-100', 'text-green-800');
+        }
+    }
+
+    async function syncData(url, body) {
+        showMessage('Syncing data...', false);
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const text = await response.text();
+            if (response.ok) {
+                showMessage(text, false);
+            } else {
+                showMessage('Error: ' + text, true);
+            }
+        } catch (error) {
+            showMessage('An unexpected error occurred.', true);
+            console.error('Error:', error);
+        }
+    }
+
+    document.getElementById('sync-state-btn').addEventListener('click', () => {
+        syncData('/gces/sync-state', { userName: userName });
+    });
+    document.getElementById('sync-district-btn').addEventListener('click', () => {
+        syncData('/gces/sync-district', { userName: userName });
+    });
+    document.getElementById('sync-subdistrict-btn').addEventListener('click', () => {
+        syncData('/gces/sync-subDistrict', { userName: userName });
+    });
+
+    document.getElementById('sync-villages-by-state-btn').addEventListener('click', () => {
+        const stateLgdInput = document.getElementById('state-lgd-input').value;
+        const stateLgdList = stateLgdInput.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+
+        if (stateLgdList.length === 0) {
+            showMessage('Please enter at least one valid State LGD Code.', true);
+            return;
+        }
+
+        const body = {
+            userName: userName,
+            stateLGDCodeList: stateLgdList
+        };
+        syncData('/gces/sync-villages-by-state', body);
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+        window.location.href = '/login-page';
+    });
+</script>
+</body>
+</html>
