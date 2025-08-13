@@ -13,4 +13,10 @@ public interface VillageRepository extends JpaRepository<Village, Long> {
     Page<Village> findByVillageNameContainingIgnoreCase(String villageName, Pageable pageable);
     Page<Village> findByVillageNameContainingIgnoreCaseAndStateLgdCode(String villageName, Long stateLgdCode, Pageable pageable);
     Page<Village> findByStateLgdCode(Long stateLgdCode, Pageable pageable);
+
+
+    // NEW: Method to find all villages for Excel export (no pagination)
+    List<Village> findByVillageNameContainingIgnoreCase(String villageName);
+    List<Village> findByVillageNameContainingIgnoreCaseAndStateLgdCode(String villageName, Long stateLgdCode);
+    List<Village> findByStateLgdCode(Long stateLgdCode);
 }

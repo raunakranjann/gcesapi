@@ -10,7 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.OutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 @Service
 public class GcesService {
@@ -68,7 +76,7 @@ public class GcesService {
                 if (data != null && data.getUserToken() != null && data.getUserId() != null) {
                     UserToken userToken = new UserToken();
                     userToken.setUserName(userName);
-                    userToken.setUserFullName(data.getUserFullName()); // ADDED: Set the new field
+                    userToken.setUserFullName(data.getUserFullName());
                     userToken.setToken(data.getUserToken());
                     userToken.setUserId(data.getUserId());
                     userToken.setCreatedAt(LocalDateTime.now());
@@ -78,20 +86,20 @@ public class GcesService {
                         UserToken tokenToUpdate = existingToken.get();
                         tokenToUpdate.setToken(data.getUserToken());
                         tokenToUpdate.setUserId(data.getUserId());
-                        tokenToUpdate.setUserFullName(data.getUserFullName()); // UPDATED: Set the new field
+                        tokenToUpdate.setUserFullName(data.getUserFullName());
                         userTokenRepository.save(tokenToUpdate);
                         return tokenToUpdate;
                     } else {
                         return userTokenRepository.save(userToken);
                     }
                 } else {
-                    throw new RuntimeException("Authentication successful, but userToken or userId is missing in the response.");
+                    throw new RuntimeException("Login failed: API response missing token or user ID.");
                 }
             } else {
-                throw new RuntimeException("Authentication failed: " + responseEntity.getStatusCode() + " - " + responseEntity.getBody().getMessage());
+                throw new RuntimeException("Incorrect username or password.");
             }
         } catch (Exception e) {
-            throw new RuntimeException("Error during authentication API call: " + e.getMessage(), e);
+            throw new RuntimeException("Incorrect username or password.");
         }
     }
 
@@ -300,6 +308,54 @@ public class GcesService {
         } catch (Exception e) {
             throw new RuntimeException("Error during sub-district data API call: " + e.getMessage(), e);
         }
+    }
+
+    public void exportVillagesToExcel(List<Village> villages, OutputStream outputStream) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Villages");
+
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        String[] headers = {"Village ID", "Village Name", "Village LGD Code", "State Name", "State LGD Code", "District Name", "District LGD Code", "Sub-District Name", "Sub-District LGD Code"};
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+
+        // Fill data rows
+        int rowNum = 1;
+        for (Village village : villages) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(village.getVillageId());
+            row.createCell(1).setCellValue(village.getVillageName());
+            row.createCell(2).setCellValue(village.getVillageLgdCode());
+            row.createCell(3).setCellValue(village.getStateName());
+            row.createCell(4).setCellValue(village.getStateLgdCode());
+            row.createCell(5).setCellValue(village.getDistrictName());
+            row.createCell(6).setCellValue(village.getDistrictLgdCode());
+            row.createCell(7).setCellValue(village.getSubDistrictName());
+            row.createCell(8).setCellValue(village.getSubDistrictLgdCode());
+        }
+
+        workbook.write(outputStream);
+        workbook.close();
+    }
+
+    // NEW: Methods for fetching villages with search and filter for download
+    public List<Village> findAllVillages() {
+        return villageRepository.findAll();
+    }
+
+    public List<Village> findVillagesBySearch(String search) {
+        return villageRepository.findByVillageNameContainingIgnoreCase(search);
+    }
+
+    public List<Village> findVillagesByStateLgdCode(Long stateLgdCode) {
+        return villageRepository.findByStateLgdCode(stateLgdCode);
+    }
+
+    public List<Village> findVillagesBySearchAndStateLgdCode(String search, Long stateLgdCode) {
+        return villageRepository.findByVillageNameContainingIgnoreCaseAndStateLgdCode(search, stateLgdCode);
     }
 
     private Village mapToVillageEntity(VillageData villageData) {

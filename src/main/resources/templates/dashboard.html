@@ -27,6 +27,10 @@
             cursor: not-allowed;
             opacity: 0.5;
         }
+        .jump-page input {
+            width: 5rem;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="bg-gray-100" th:data-user-name="${userName}" th:data-user-full-name="${userFullName}">
@@ -67,9 +71,15 @@
     <div id="message-box" class="mt-8 p-4 rounded-lg text-sm hidden"></div>
 
     <div class="mt-12 overflow-x-auto">
-        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Village List (<span th:text="${totalItems}"></span> villages total)</h3>
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-2xl font-semibold text-gray-800">Village List (<span th:text="${totalItems}"></span> villages total)</h3>
+            <button id="download-excel-btn" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-green-700 transition duration-300">
+                Download Excel
+            </button>
+        </div>
 
         <div class="flex items-center space-x-2 mb-4">
+            <input type="text" id="search-input" placeholder="Search by name or LGD code..." class="flex-grow p-2 border border-gray-300 rounded-lg" th:value="${search}">
             <select id="state-filter" class="p-2 border border-gray-300 rounded-lg">
                 <option value="all" th:selected="${stateLgdCode == null || stateLgdCode == 'all'}">All States</option>
                 <option th:each="state : ${distinctStates}"
@@ -78,7 +88,6 @@
                         th:selected="${stateLgdCode == state.lgdCode}">
                 </option>
             </select>
-            <input type="text" id="search-input" placeholder="Search by name or LGD code..." class="flex-grow p-2 border border-gray-300 rounded-lg" th:value="${search}">
             <button id="search-btn" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-gray-700 transition duration-300">
                 Search
             </button>
@@ -132,7 +141,16 @@
 </div>
 
 <script th:inline="javascript">
-    const userName = document.body.dataset.userName;
+    const currentPage = /*[[${currentPage}]]*/ 0;
+    const totalPages = /*[[${totalPages}]]*/ 1;
+    // CORRECTED: The variable userName is now correctly retrieved from the data attribute
+    const userNameParam = document.body.dataset.userName;
+    const searchInput = document.getElementById('search-input');
+    const stateFilter = document.getElementById('state-filter');
+    const searchButton = document.getElementById('search-btn');
+    const pageInput = document.getElementById('page-input');
+    const downloadExcelButton = document.getElementById('download-excel-btn');
+
     const messageBox = document.getElementById('message-box');
 
     function showMessage(message, isError = false) {
@@ -169,13 +187,13 @@
     }
 
     document.getElementById('sync-state-btn').addEventListener('click', () => {
-        syncData('/gces/sync-state', { userName: userName });
+        syncData('/gces/sync-state', { userName: userNameParam });
     });
     document.getElementById('sync-district-btn').addEventListener('click', () => {
-        syncData('/gces/sync-district', { userName: userName });
+        syncData('/gces/sync-district', { userName: userNameParam });
     });
     document.getElementById('sync-subdistrict-btn').addEventListener('click', () => {
-        syncData('/gces/sync-subDistrict', { userName: userName });
+        syncData('/gces/sync-subDistrict', { userName: userNameParam });
     });
 
     document.getElementById('sync-villages-by-state-btn').addEventListener('click', () => {
@@ -188,7 +206,7 @@
         }
 
         const body = {
-            userName: userName,
+            userName: userNameParam,
             stateLGDCodeList: stateLgdList
         };
         syncData('/gces/sync-villages-by-state', body);
@@ -198,15 +216,6 @@
         window.location.href = '/login-page';
     });
 
-    const currentPage = /*[[${currentPage}]]*/ 0;
-    const totalPages = /*[[${totalPages}]]*/ 1;
-    const userNameParam = '[[${userName}]]';
-    const searchInput = document.getElementById('search-input');
-    const stateFilter = document.getElementById('state-filter');
-    const searchButton = document.getElementById('search-btn');
-    const pageInput = document.getElementById('page-input');
-
-    // Pagination Logic
     const currentQuery = new URLSearchParams(window.location.search);
 
     function updatePage(pageNumber) {
@@ -228,7 +237,6 @@
         }
     });
 
-    // Dynamic filtering based on search and state
     searchButton.addEventListener('click', () => {
         const searchInput = document.getElementById('search-input').value;
         currentQuery.set('search', searchInput);
@@ -243,7 +251,26 @@
         window.location.href = '/dashboard?' + currentQuery.toString();
     });
 
-    // Set search input and state filter to reflect current URL parameters
+    downloadExcelButton.addEventListener('click', () => {
+        const search = currentQuery.get('search');
+        const stateLgdCode = currentQuery.get('stateLgdCode');
+        let downloadUrl = '/gces/download/villages';
+
+        const params = [];
+        if (search) {
+            params.push(`search=${encodeURIComponent(search)}`);
+        }
+        if (stateLgdCode && stateLgdCode !== 'all') {
+            params.push(`stateLgdCode=${encodeURIComponent(stateLgdCode)}`);
+        }
+
+        if (params.length > 0) {
+            downloadUrl += '?' + params.join('&');
+        }
+
+        window.location.href = downloadUrl;
+    });
+
     const initialSearch = currentQuery.get('search') || '';
     const initialStateLgdCode = currentQuery.get('stateLgdCode') || 'all';
     searchInput.value = initialSearch;
