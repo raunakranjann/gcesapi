@@ -312,11 +312,11 @@ public class GcesService {
 
     public void exportVillagesToExcel(List<Village> villages, OutputStream outputStream) throws IOException {
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Villages");
+        Sheet sheet = workbook.createSheet("Export_Villages");
 
         // Create header row
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"Village ID", "Village Name", "Village LGD Code", "State Name", "State LGD Code", "District Name", "District LGD Code", "Sub-District Name", "Sub-District LGD Code"};
+        String[] headers = {"State LGD Code", "State Name", "District LGD Code", "District Name", "Sub-District LGD Code","Sub-District Name", "Village LGD Code", "Village Name", "Village ID"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -326,15 +326,15 @@ public class GcesService {
         int rowNum = 1;
         for (Village village : villages) {
             Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(village.getVillageId());
-            row.createCell(1).setCellValue(village.getVillageName());
-            row.createCell(2).setCellValue(village.getVillageLgdCode());
-            row.createCell(3).setCellValue(village.getStateName());
-            row.createCell(4).setCellValue(village.getStateLgdCode());
-            row.createCell(5).setCellValue(village.getDistrictName());
-            row.createCell(6).setCellValue(village.getDistrictLgdCode());
-            row.createCell(7).setCellValue(village.getSubDistrictName());
-            row.createCell(8).setCellValue(village.getSubDistrictLgdCode());
+            row.createCell(0).setCellValue(village.getStateLgdCode());
+            row.createCell(1).setCellValue(village.getStateName());
+            row.createCell(2).setCellValue(village.getDistrictLgdCode());
+            row.createCell(3).setCellValue(village.getDistrictName());
+            row.createCell(4).setCellValue(village.getSubDistrictLgdCode());
+            row.createCell(5).setCellValue(village.getSubDistrictName());
+            row.createCell(6).setCellValue(village.getVillageLgdCode());
+            row.createCell(7).setCellValue(village.getVillageName());
+            row.createCell(8).setCellValue(village.getVillageId());
         }
 
         workbook.write(outputStream);

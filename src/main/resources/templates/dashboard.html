@@ -96,28 +96,28 @@
         <table class="min-w-full" id="village-table">
             <thead>
             <tr>
-                <th>Village ID</th>
-                <th>Village LGD Code</th>
-                <th>Village Name</th>
-                <th>Sub-District LGD Code</th>
-                <th>Sub-District Name</th>
-                <th>District LGD Code</th>
-                <th>District Name</th>
                 <th>State LGD Code</th>
                 <th>State Name</th>
+                <th>District LGD Code</th>
+                <th>District Name</th>
+                <th>Sub-District LGD Code</th>
+                <th>Sub-District Name</th>
+                <th>Village LGD Code</th>
+                <th>Village Name</th>
+                <th>Village ID</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="village : ${villages}" th:data-state-lgd="${village.stateLgdCode}">
-                <td th:text="${village.villageId}"></td>
-                <td th:text="${village.villageLgdCode}"></td>
-                <td th:text="${village.villageName}"></td>
-                <td th:text="${village.subDistrictLgdCode}"></td>
-                <td th:text="${village.subDistrictName}"></td>
-                <td th:text="${village.districtLgdCode}"></td>
-                <td th:text="${village.districtName}"></td>
                 <td th:text="${village.stateLgdCode}"></td>
                 <td th:text="${village.stateName}"></td>
+                <td th:text="${village.districtLgdCode}"></td>
+                <td th:text="${village.districtName}"></td>
+                <td th:text="${village.subDistrictLgdCode}"></td>
+                <td th:text="${village.subDistrictName}"></td>
+                <td th:text="${village.villageLgdCode}"></td>
+                <td th:text="${village.villageName}"></td>
+                <td th:text="${village.villageId}"></td>
             </tr>
             </tbody>
         </table>
