@@ -22,6 +22,4 @@ public class Village {
     private Long subDistrictId;
     private String subDistrictName;
     private Long subDistrictLgdCode;
-
-    // You can add more fields from the response if needed
 }

@@ -1,10 +1,13 @@
 package com.example.gcesapi.controller;
 
 import com.example.gcesapi.model.*;
+import com.example.gcesapi.repository.VillageRepository;
 import com.example.gcesapi.service.GcesService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.ui.Model;
 
 @RestController
 @RequestMapping("/gces")

@@ -6,24 +6,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .container { max-width: 800px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 2rem; background-color: #fff; border-radius: 0.75rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 0.75rem; border: 1px solid #e5e7eb; text-align: left; }
+        th { background-color: #f9fafb; font-weight: 600; }
+        tbody tr:nth-child(odd) { background-color: #f9fafb; }
+        tbody tr:hover { background-color: #f3f4f6; }
+        .pagination-controls button {
+            background-color: #e5e7eb;
+            color: #1f2937;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .pagination-controls button:hover:not(:disabled) {
+            background-color: #d1d5db;
+        }
+        .pagination-controls button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body class="bg-gray-100" th:data-user-name="${userName}" th:data-user-full-name="${userFullName}">
 <div class="container text-center">
 
-     <h1 class="text-3xl font-bold mb-4 text-gray-900 float-left">Welcome, <span th:text="${userFullName}">User</span>!</h1> 
-    
-     <div id="message-box" class="mt-8 p-4 rounded-lg text-sm hidden float-left"></div>
-     <button id="logout-btn" class="mt-8 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-red-700 transition duration-300 float-right">
-        Logout
-    </button>
-  
+    <header class="flex justify-between items-center mb-8 border-b-2 border-gray-200 pb-4">
+        <h1 class="text-3xl font-bold text-gray-900">Welcome, <span th:text="${userFullName}">User</span>!</h1>
+        <button id="logout-btn" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-red-700 transition duration-300">
+            Logout
+        </button>
+    </header>
 
-     
-    <br><br><br><br>
-    <br>
-   
     <p class="text-gray-600 mb-8">Click a button below to synchronize data from the GCES API.</p>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
@@ -49,12 +64,74 @@
         </button>
     </div>
 
+    <div id="message-box" class="mt-8 p-4 rounded-lg text-sm hidden"></div>
 
-   
+    <div class="mt-12 overflow-x-auto">
+        <h3 class="text-2xl font-semibold mb-4 text-gray-800">Village List (<span th:text="${totalItems}"></span> villages total)</h3>
+
+        <div class="flex items-center space-x-2 mb-4">
+            <select id="state-filter" class="p-2 border border-gray-300 rounded-lg">
+                <option value="all" th:selected="${stateLgdCode == null || stateLgdCode == 'all'}">All States</option>
+                <option th:each="state : ${distinctStates}"
+                        th:value="${state.lgdCode}"
+                        th:text="${state.name}"
+                        th:selected="${stateLgdCode == state.lgdCode}">
+                </option>
+            </select>
+            <input type="text" id="search-input" placeholder="Search by name or LGD code..." class="flex-grow p-2 border border-gray-300 rounded-lg" th:value="${search}">
+            <button id="search-btn" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-lg hover:bg-gray-700 transition duration-300">
+                Search
+            </button>
+        </div>
+
+        <table class="min-w-full" id="village-table">
+            <thead>
+            <tr>
+                <th>Village ID</th>
+                <th>Village LGD Code</th>
+                <th>Village Name</th>
+                <th>Sub-District LGD Code</th>
+                <th>Sub-District Name</th>
+                <th>District LGD Code</th>
+                <th>District Name</th>
+                <th>State LGD Code</th>
+                <th>State Name</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="village : ${villages}" th:data-state-lgd="${village.stateLgdCode}">
+                <td th:text="${village.villageId}"></td>
+                <td th:text="${village.villageLgdCode}"></td>
+                <td th:text="${village.villageName}"></td>
+                <td th:text="${village.subDistrictLgdCode}"></td>
+                <td th:text="${village.subDistrictName}"></td>
+                <td th:text="${village.districtLgdCode}"></td>
+                <td th:text="${village.districtName}"></td>
+                <td th:text="${village.stateLgdCode}"></td>
+                <td th:text="${village.stateName}"></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="pagination-controls flex justify-center items-center space-x-4 mt-8">
+            <button id="first-page" th:disabled="${currentPage == 0}">&lt;&lt;</button>
+            <button id="prev-page" th:disabled="${currentPage == 0}">&lt;</button>
+            <span class="flex items-center space-x-2">
+                    <span>Page</span>
+                    <input type="number" id="page-input" class="jump-page p-1 border border-gray-300 rounded-lg"
+                           th:value="${currentPage + 1}" min="1" th:max="${totalPages}">
+                    <span>of <span th:text="${totalPages}"></span></span>
+                    <button id="go-page" class="bg-gray-600 text-white font-semibold py-1 px-3 rounded-lg shadow-lg hover:bg-gray-700 transition duration-300">Go</button>
+                </span>
+            <button id="next-page" th:disabled="${currentPage == totalPages - 1}">&gt;</button>
+            <button id="last-page" th:disabled="${currentPage == totalPages - 1}">&gt;&gt;</button>
+        </div>
+
+    </div>
 
 </div>
 
-<script>
+<script th:inline="javascript">
     const userName = document.body.dataset.userName;
     const messageBox = document.getElementById('message-box');
 
@@ -79,6 +156,9 @@
             const text = await response.text();
             if (response.ok) {
                 showMessage(text, false);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             } else {
                 showMessage('Error: ' + text, true);
             }
@@ -117,6 +197,57 @@
     document.getElementById('logout-btn').addEventListener('click', () => {
         window.location.href = '/login-page';
     });
+
+    const currentPage = /*[[${currentPage}]]*/ 0;
+    const totalPages = /*[[${totalPages}]]*/ 1;
+    const userNameParam = '[[${userName}]]';
+    const searchInput = document.getElementById('search-input');
+    const stateFilter = document.getElementById('state-filter');
+    const searchButton = document.getElementById('search-btn');
+    const pageInput = document.getElementById('page-input');
+
+    // Pagination Logic
+    const currentQuery = new URLSearchParams(window.location.search);
+
+    function updatePage(pageNumber) {
+        currentQuery.set('page', pageNumber);
+        window.location.href = '/dashboard?' + currentQuery.toString();
+    }
+
+    document.getElementById('first-page').addEventListener('click', () => updatePage(0));
+    document.getElementById('prev-page').addEventListener('click', () => updatePage(currentPage - 1));
+    document.getElementById('next-page').addEventListener('click', () => updatePage(currentPage + 1));
+    document.getElementById('last-page').addEventListener('click', () => updatePage(totalPages - 1));
+
+    document.getElementById('go-page').addEventListener('click', () => {
+        const pageToGo = parseInt(pageInput.value, 10);
+        if (!isNaN(pageToGo) && pageToGo >= 1 && pageToGo <= totalPages) {
+            updatePage(pageToGo - 1);
+        } else {
+            showMessage(`Please enter a page number between 1 and ${totalPages}.`, true);
+        }
+    });
+
+    // Dynamic filtering based on search and state
+    searchButton.addEventListener('click', () => {
+        const searchInput = document.getElementById('search-input').value;
+        currentQuery.set('search', searchInput);
+        currentQuery.set('page', 0); // Reset to first page
+        window.location.href = '/dashboard?' + currentQuery.toString();
+    });
+
+    stateFilter.addEventListener('change', () => {
+        const stateFilterValue = document.getElementById('state-filter').value;
+        currentQuery.set('stateLgdCode', stateFilterValue);
+        currentQuery.set('page', 0); // Reset to first page
+        window.location.href = '/dashboard?' + currentQuery.toString();
+    });
+
+    // Set search input and state filter to reflect current URL parameters
+    const initialSearch = currentQuery.get('search') || '';
+    const initialStateLgdCode = currentQuery.get('stateLgdCode') || 'all';
+    searchInput.value = initialSearch;
+    stateFilter.value = initialStateLgdCode;
 </script>
 </body>
 </html>
